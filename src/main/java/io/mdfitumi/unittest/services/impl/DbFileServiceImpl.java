@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class DbFileServiceImpl implements DbFileService {
-    private final EntityManager em;
     private final FileRepository fileRepository;
     private final FileFilterRepository fileFilterRepository;
     private final OwnerRepository ownerRepository;
@@ -49,8 +48,7 @@ public class DbFileServiceImpl implements DbFileService {
             LocalDateTime.now().plusDays(1L);
 
     @Autowired
-    public DbFileServiceImpl(EntityManager em, FileRepository fileRepository, FileFilterRepository fileFilterRepository, OwnerRepository ownerRepository, FolderDataRepository folderDataRepository, ObjectMapper objectMapper, MinioService minioService) {
-        this.em = em;
+    public DbFileServiceImpl(FileRepository fileRepository, FileFilterRepository fileFilterRepository, OwnerRepository ownerRepository, FolderDataRepository folderDataRepository, ObjectMapper objectMapper, MinioService minioService) {
         this.fileRepository = fileRepository;
         this.fileFilterRepository = fileFilterRepository;
         this.ownerRepository = ownerRepository;
@@ -202,7 +200,7 @@ public class DbFileServiceImpl implements DbFileService {
     @Override
     public FileResponse deleted(UUID uuid) {
         FileResponse fileResponse = new FileResponse();
-        FileObj fileObj = em.getReference(FileObj.class, uuid);
+        FileObj fileObj = fileRepository.findById(uuid).orElseThrow();
         if (!fileObj.isDeleted()) {
             fileObj.setUpdateDateTime(LocalDateTime.now());
             fileObj.setDeleted(true);

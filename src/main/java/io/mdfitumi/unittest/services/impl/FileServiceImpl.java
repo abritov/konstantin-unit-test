@@ -42,11 +42,10 @@ public class FileServiceImpl implements FileService {
         minioService.putObjectIntoTheBucket(bucketName,
                 getInputStreamForFileObjDto(fileObjDTO),
                 fileObj.getId().toString());
-        fileObjDTO = objectMapper.fileToFileObjDTO(fileObj);
         FileResponse fileResponse = new FileResponse();
         fileResponse.setMessage("");
         fileResponse.setSuccess(true);
-        fileResponse.getFileObjPages().add(fileObjDTO);
+        fileResponse.getFileObjPages().add(objectMapper.fileToFileObjDTO(fileObj));
         return fileResponse;
     }
 

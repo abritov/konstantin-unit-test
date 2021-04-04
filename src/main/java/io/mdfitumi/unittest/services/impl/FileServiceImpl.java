@@ -24,16 +24,19 @@ public class FileServiceImpl implements FileService {
 
     @Value("${minio.bucket.name}")
     private String bucketName;
-    private final DbFileService dbFileService;
-    private final MinioService minioService;
-    private final ObjectMapper objectMapper;
-
     @Autowired
-    public FileServiceImpl(DbFileService dbFileService, MinioService minioService, ObjectMapper objectMapper) {
-        this.dbFileService = dbFileService;
-        this.minioService = minioService;
-        this.objectMapper = objectMapper;
-    }
+    private DbFileService dbFileService;
+    @Autowired
+    private MinioService minioService;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+//    @Autowired
+//    public FileServiceImpl(DbFileService dbFileService, MinioService minioService, ObjectMapper objectMapper) {
+//        this.dbFileService = dbFileService;
+//        this.minioService = minioService;
+//        this.objectMapper = objectMapper;
+//    }
 
     @Transactional
     @Override

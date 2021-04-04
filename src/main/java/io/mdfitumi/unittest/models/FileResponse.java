@@ -3,12 +3,13 @@ package io.mdfitumi.unittest.models;
 import io.mdfitumi.unittest.dto.FileObjDTO;
 import io.mdfitumi.unittest.dto.PagerDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FileResponse {
     private String message;
     private Boolean success;
-    private List<FileObjDTO> pages;
+    private List<FileObjDTO> pages = new ArrayList<>();
     private PagerDTO pager;
 
     public PagerDTO getPagerDTO() {

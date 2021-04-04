@@ -13,6 +13,7 @@ import io.mdfitumi.unittest.services.DbFileService;
 import io.mdfitumi.unittest.services.FileService;
 import io.mdfitumi.unittest.services.MinioService;
 import io.mdfitumi.unittest.services.ObjectMapper;
+import io.mdfitumi.unittest.services.impl.FileServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -26,6 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -63,6 +65,13 @@ public class FileServiceTest {
 //            };
 //        }
 //    }
+    @TestConfiguration
+    static class FileServiceTestConfiguration {
+        @Bean
+        public FileServiceImpl fileService() {
+            return new FileServiceImpl();
+        }
+    }
 
     @MockBean
     FileRepository fileRepository;
@@ -92,11 +101,6 @@ public class FileServiceTest {
         FileObj mockFileObj = new FileObj();
         mockFileObj.setId(1L);
         Mockito.when(dbFileService.create(Mockito.any())).thenReturn(mockFileObj);
-//        Mockito.when(minioService.putObjectIntoTheBucket(
-//                Mockito.anyString(),
-//                Mockito.any(),
-//                Mockito.anyString()
-//        )).thenReturn();
         Mockito.when(objectMapper.fileToFileObjDTO(mockFileObj)).thenReturn(new FileObjDTO());
 
         String testFileData = "test file data";
@@ -105,9 +109,9 @@ public class FileServiceTest {
         fileService.create(createFileRequest);
 
         Mockito.verify(minioService).putObjectIntoTheBucket(
-                bucketName,
-                new ByteArrayInputStream(testFileData.getBytes(StandardCharsets.UTF_8)),
-                mockFileObj.getId().toString()
+                Mockito.eq(bucketName),
+                Mockito.any(InputStream.class),
+                Mockito.eq(mockFileObj.getId().toString())
         );
     }
 }

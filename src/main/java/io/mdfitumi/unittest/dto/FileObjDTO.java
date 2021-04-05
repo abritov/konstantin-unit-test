@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 
 public class FileObjDTO {
     private String data;
+    private String ext;
+    private String fileName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -31,11 +33,18 @@ public class FileObjDTO {
     }
 
     public String getFileName() {
-        return "";
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getExt() {
-        return "";
+        return this.ext;
+    }
+    public void setExt(String ext) {
+        this.ext = ext;
     }
 
     public Boolean getDeleted() {

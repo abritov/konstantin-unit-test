@@ -129,4 +129,43 @@ public class FileServiceTest {
         Assert.assertTrue(result.getSuccess());
         Assert.assertEquals(1, result.getFileObjPages().size());
     }
+
+    @Test
+    public void fileServiceUpdateWithoutFileData_shouldUpdateFileNameAndExtFields() {
+        FileObj mockFileObj = new FileObj();
+        mockFileObj.setId(1L);
+        mockFileObj.setFileName("old");
+        mockFileObj.setExt("txt");
+
+        FileObjDTO updateRequest = new FileObjDTO();
+        updateRequest.setExt("py");
+        updateRequest.setFileName("new");
+
+        Mockito
+                .when(fileRepository.getOne(Mockito.any(UUID.class)))
+                .thenReturn(mockFileObj);
+        Mockito
+                .when(objectMapper.fileToFileObjDTO(Mockito.eq(mockFileObj)))
+                .thenReturn(updateRequest);
+
+        FileResponse result = fileService
+                .update(new UUID(1, 1), updateRequest);
+
+        FileObj expectedFileObj = new FileObj();
+        expectedFileObj.setFileName("new");
+        expectedFileObj.setExt("py");
+        Mockito.verify(fileRepository).save(Mockito.eq(mockFileObj));
+//        Mockito.verify(minioService).putObjectIntoTheBucket(
+//                Mockito.eq(bucketName),
+//                Mockito.any(InputStream.class),
+//                Mockito.eq(new UUID(1, 1).toString())
+//        );
+        Mockito.verify(objectMapper).fileToFileObjDTO(mockFileObj);
+
+        Assert.assertEquals("", result.getMessage());
+        Assert.assertTrue(result.getSuccess());
+        Assert.assertEquals(1, result.getFileObjPages().size());
+        Assert.assertEquals("new", result.getFileObjPages().get(0).getFileName());
+        Assert.assertEquals("py", result.getFileObjPages().get(0).getExt());
+    }
 }

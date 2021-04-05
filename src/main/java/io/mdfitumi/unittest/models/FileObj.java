@@ -1,5 +1,6 @@
 package io.mdfitumi.unittest.models;
 
+import io.mdfitumi.unittest.dto.FileObjDTO;
 import io.mdfitumi.unittest.entities.FolderData;
 import io.mdfitumi.unittest.entities.Owner;
 
@@ -9,6 +10,8 @@ import java.util.Date;
 public class FileObj {
     private Long id;
     private String data;
+    private String fileName;
+    private String ext;
     private FolderData folderData;
     private Owner owner;
     private LocalDateTime updatedAt;
@@ -51,9 +54,11 @@ public class FileObj {
     }
 
     public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public void setExt(String ext) {
+        this.ext = ext;
     }
 
     public void setDeleted(boolean deleted) {
@@ -61,5 +66,12 @@ public class FileObj {
 
     public boolean isDeleted() {
         return false;
+    }
+
+    public FileObjDTO toFileObjDto() {
+        FileObjDTO result = new FileObjDTO();
+        result.setFileName(this.fileName);
+        result.setExt(this.ext);
+        return result;
     }
 }

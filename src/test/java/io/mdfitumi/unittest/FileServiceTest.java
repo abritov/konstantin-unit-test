@@ -225,4 +225,26 @@ public class FileServiceTest {
         Assert.assertTrue(result.getSuccess());
         Assert.assertNull(result.getFileObjPages());
     }
+
+    @Test
+    public void fileServiceDeleteDeletedFile_shouldNotSaveNewFileObj() {
+        UUID mockUUID = new UUID(1, 1);
+        LocalDateTime now = LocalDateTime.now();
+        FileObj mockFileObj = new FileObj();
+        mockFileObj.setId(mockUUID);
+        mockFileObj.setDeleted(true);
+        mockFileObj.setUpdateDateTime(now);
+
+        Mockito
+                .when(fileRepository.findById(mockUUID))
+                .thenReturn(java.util.Optional.of(mockFileObj));
+
+        FileResponse result = fileService.setDeletedStatusForFileByUuid(mockUUID);
+
+        Mockito.verify(fileRepository, Mockito.never()).save(Mockito.any());
+
+        Assert.assertEquals("Файл уже помечен на удаление", result.getMessage());
+        Assert.assertTrue(result.getSuccess());
+        Assert.assertNull(result.getFileObjPages());
+    }
 }

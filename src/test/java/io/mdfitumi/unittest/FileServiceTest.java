@@ -35,7 +35,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -84,7 +86,7 @@ public class FileServiceTest {
     @Test
     public void fileServiceCreate_shouldCreateRecord() {
         FileObj mockFileObj = new FileObj();
-        mockFileObj.setId(1L);
+        mockFileObj.setId(new UUID(1, 1));
         Mockito.when(dbFileService.create(Mockito.any())).thenReturn(mockFileObj);
         Mockito.when(objectMapper.fileToFileObjDTO(mockFileObj)).thenReturn(new FileObjDTO());
 
@@ -103,7 +105,7 @@ public class FileServiceTest {
     @Test
     public void fileServiceFilter_shouldReturnFileResponse() {
         FileObj mockFile = new FileObj();
-        mockFile.setId(1L);
+        mockFile.setId(new UUID(1, 1));
         Page<FileObj> mockFileFilterResult = new PageImpl<>(Arrays.asList(mockFile));
 
         Mockito.when(fileFilterRepository.findByFilter(
@@ -133,7 +135,7 @@ public class FileServiceTest {
     @Test
     public void fileServiceUpdateWithoutFileData_shouldUpdateFileNameAndExtFields() {
         FileObj mockFileObj = new FileObj();
-        mockFileObj.setId(1L);
+        mockFileObj.setId(new UUID(1, 1));
         mockFileObj.setFileName("old");
         mockFileObj.setExt("txt");
 
@@ -167,7 +169,7 @@ public class FileServiceTest {
     @Test
     public void fileServiceUpdateWithFileData_shouldUpdateFieldsAndCallMinioService() {
         FileObj mockFileObj = new FileObj();
-        mockFileObj.setId(1L);
+        mockFileObj.setId(new UUID(1, 1));
         mockFileObj.setFileName("old");
         mockFileObj.setExt("txt");
 
@@ -200,5 +202,27 @@ public class FileServiceTest {
         Assert.assertEquals("new", result.getFileObjPages().get(0).getFileName());
         Assert.assertEquals("py", result.getFileObjPages().get(0).getExt());
         Assert.assertNull(result.getFileObjPages().get(0).getFileData());
+    }
+
+    @Test
+    public void fileServiceDeleteExistingFile_shouldSetDeletedFlagAndUpdateDateTime() {
+        UUID mockUUID = new UUID(1, 1);
+        LocalDateTime now = LocalDateTime.now();
+        FileObj mockFileObj = new FileObj();
+        mockFileObj.setId(mockUUID);
+        mockFileObj.setDeleted(false);
+        mockFileObj.setUpdateDateTime(now);
+
+        Mockito
+                .when(fileRepository.findById(mockUUID))
+                .thenReturn(java.util.Optional.of(mockFileObj));
+
+        FileResponse result = fileService.setDeletedStatusForFileByUuid(mockUUID);
+
+        Mockito.verify(fileRepository).save(Mockito.refEq(mockFileObj, "isDeleted", "updatedAt"));
+
+        Assert.assertEquals("", result.getMessage());
+        Assert.assertTrue(result.getSuccess());
+        Assert.assertNull(result.getFileObjPages());
     }
 }

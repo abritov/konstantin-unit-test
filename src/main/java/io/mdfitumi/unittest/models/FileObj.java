@@ -6,22 +6,24 @@ import io.mdfitumi.unittest.entities.Owner;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.UUID;
 
 public class FileObj {
-    private Long id;
+    private UUID id;
     private String data;
     private String fileName;
     private String ext;
     private FolderData folderData;
     private Owner owner;
+    private Boolean isDeleted;
     private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -62,10 +64,11 @@ public class FileObj {
     }
 
     public void setDeleted(boolean deleted) {
+        this.isDeleted = deleted;
     }
 
     public boolean isDeleted() {
-        return false;
+        return this.isDeleted;
     }
 
     public FileObjDTO toFileObjDto() {

@@ -4,6 +4,11 @@ public class Paginating {
     private Integer number;
     private Integer size;
 
+    public Paginating(Integer number, Integer size) {
+        this.number = number;
+        this.size = size;
+    }
+
     public Integer getNumber() {
         return number;
     }

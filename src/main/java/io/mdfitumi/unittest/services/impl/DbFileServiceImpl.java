@@ -32,12 +32,18 @@ import java.util.stream.Collectors;
 
 @Service
 public class DbFileServiceImpl implements DbFileService {
-    private final FileRepository fileRepository;
-    private final FileFilterRepository fileFilterRepository;
-    private final OwnerRepository ownerRepository;
-    private final FolderDataRepository folderDataRepository;
-    private final ObjectMapper objectMapper;
-    private final MinioService minioService;
+    @Autowired
+    private FileRepository fileRepository;
+    @Autowired
+    private FileFilterRepository fileFilterRepository;
+    @Autowired
+    private OwnerRepository ownerRepository;
+    @Autowired
+    private FolderDataRepository folderDataRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private MinioService minioService;
 
     private static final String UNDEFINED_OWNER_NAME = "notNameOwner";
     private static final UUID UNDEFINED_OWNER_UUID =
@@ -47,15 +53,15 @@ public class DbFileServiceImpl implements DbFileService {
     private static final LocalDateTime DEFAULT_END_DATE =
             LocalDateTime.now().plusDays(1L);
 
-    @Autowired
-    public DbFileServiceImpl(FileRepository fileRepository, FileFilterRepository fileFilterRepository, OwnerRepository ownerRepository, FolderDataRepository folderDataRepository, ObjectMapper objectMapper, MinioService minioService) {
-        this.fileRepository = fileRepository;
-        this.fileFilterRepository = fileFilterRepository;
-        this.ownerRepository = ownerRepository;
-        this.folderDataRepository = folderDataRepository;
-        this.objectMapper = objectMapper;
-        this.minioService = minioService;
-    }
+//    @Autowired
+//    public DbFileServiceImpl(FileRepository fileRepository, FileFilterRepository fileFilterRepository, OwnerRepository ownerRepository, FolderDataRepository folderDataRepository, ObjectMapper objectMapper, MinioService minioService) {
+//        this.fileRepository = fileRepository;
+//        this.fileFilterRepository = fileFilterRepository;
+//        this.ownerRepository = ownerRepository;
+//        this.folderDataRepository = folderDataRepository;
+//        this.objectMapper = objectMapper;
+//        this.minioService = minioService;
+//    }
 
     @Override
     public FileObj create(FileObjDTO fileObjDTO) {
@@ -102,7 +108,6 @@ public class DbFileServiceImpl implements DbFileService {
 
     @Override
     public FileResponse filter(FileFilterDto fileFilterDto) {
-
         FileResponse fileResponse = new FileResponse();
         PagerDTO pagerDTO = new PagerDTO();
 
@@ -149,7 +154,6 @@ public class DbFileServiceImpl implements DbFileService {
                 checkDeleted, deleted, checkExt, ext,
                 checkOwnerId, ownerUuid, beginDateTime, endDateTime, pageable
         );
-
         List<FileObjDTO> fileObjDTOList = pageFilesObj
                 .getContent()
                 .stream()

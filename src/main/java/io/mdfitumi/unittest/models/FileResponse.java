@@ -27,10 +27,6 @@ public class FileResponse {
         return success;
     }
 
-    public List<FileObjDTO> getFileObjPages() {
-        return pages;
-    }
-
     public void setMessage(String message) {
         this.message = message;
     }
@@ -39,10 +35,11 @@ public class FileResponse {
         this.success = success;
     }
 
-    public void setPages(List<FileObjDTO> pages) {
+    public void setFileObjPages(List<FileObjDTO> pages) {
         this.pages = pages;
     }
 
-    public void setFileObjPages(List<FileObjDTO> fileObjDTOList) {
+    public List<FileObjDTO> getFileObjPages() {
+        return this.pages;
     }
 }

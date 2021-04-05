@@ -16,6 +16,9 @@ public class FileFilterDto {
     public Paginating getPaginating() {
         return pagination;
     }
+    public void setPaginating(Paginating pagination) {
+        this.pagination = pagination;
+    }
 
     public Boolean getDeleted() {
         return deleted;

@@ -2,6 +2,7 @@ package io.mdfitumi.unittest;
 
 import io.mdfitumi.unittest.dto.FileFilterDto;
 import io.mdfitumi.unittest.dto.FileObjDTO;
+import io.mdfitumi.unittest.dto.Paginating;
 import io.mdfitumi.unittest.exceptions.NoSuchElementInMinioException;
 import io.mdfitumi.unittest.models.FileObj;
 import io.mdfitumi.unittest.models.FileResponse;
@@ -13,7 +14,9 @@ import io.mdfitumi.unittest.services.DbFileService;
 import io.mdfitumi.unittest.services.FileService;
 import io.mdfitumi.unittest.services.MinioService;
 import io.mdfitumi.unittest.services.ObjectMapper;
+import io.mdfitumi.unittest.services.impl.DbFileServiceImpl;
 import io.mdfitumi.unittest.services.impl.FileServiceImpl;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -24,47 +27,29 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 public class FileServiceTest {
-//    @TestConfiguration
-//    static class DbFileServiceConfigurationContext {
-//        @Bean
-//        public DbFileService dbFileService() {
-//            return new DbFileService() {
-//                @Override
-//                public FileObj create(FileObjDTO fileObjDTO) {
-//                    return null;
-//                }
-//
-//                @Override
-//                public FileResponse filter(FileFilterDto fileFilterDto) {
-//                    return null;
-//                }
-//
-//                @Override
-//                public FileObj update(UUID uuid, FileObjDTO fileObjDTO) {
-//                    return null;
-//                }
-//
-//                @Override
-//                public FileResponse deleted(UUID uuid) {
-//                    return null;
-//                }
-//
-//                @Override
-//                public FileObjDTO getFileById(UUID uuid) throws NoSuchElementInMinioException {
-//                    return null;
-//                }
-//            };
-//        }
-//    }
+    @TestConfiguration
+    static class DbFileServiceConfigurationContext {
+        @Bean
+        public DbFileService dbFileService() {
+            return new DbFileServiceImpl();
+        }
+    }
     @TestConfiguration
     static class FileServiceTestConfiguration {
         @Bean
@@ -86,7 +71,7 @@ public class FileServiceTest {
     @MockBean
     MinioService minioService;
 
-    @MockBean
+    @Autowired
     DbFileService dbFileService;
 
 
@@ -113,5 +98,35 @@ public class FileServiceTest {
                 Mockito.any(InputStream.class),
                 Mockito.eq(mockFileObj.getId().toString())
         );
+    }
+
+    @Test
+    public void fileServiceFilter_shouldReturnFileResponse() {
+        FileObj mockFile = new FileObj();
+        mockFile.setId(1L);
+        Page<FileObj> mockFileFilterResult = new PageImpl<>(Arrays.asList(mockFile));
+
+        Mockito.when(fileFilterRepository.findByFilter(
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.anyString(),
+                Mockito.anyBoolean(),
+                Mockito.any(UUID.class),
+                Mockito.any(LocalDateTime.class),
+                Mockito.any(LocalDateTime.class),
+                Mockito.any(Pageable.class)
+        )).thenReturn(mockFileFilterResult);
+
+        FileFilterDto filterRequest = new FileFilterDto();
+        filterRequest.setPaginating(new Paginating(10, 256));
+
+        FileResponse result = fileService.filter(filterRequest);
+
+        Mockito.verify(objectMapper).fileToFileObjDTO(Mockito.eq(mockFile));
+
+        Assert.assertEquals("", result.getMessage());
+        Assert.assertTrue(result.getSuccess());
+        Assert.assertEquals(1, result.getFileObjPages().size());
     }
 }

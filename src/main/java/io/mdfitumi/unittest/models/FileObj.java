@@ -35,13 +35,16 @@ public class FileObj {
         this.folderData = data;
     }
     public void setFileData(String data) {
-
+        this.data = data;
     }
     public void setCreateDateTime(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
     public LocalDateTime getCreateDateTime() {
         return this.createdAt;
+    }
+    public LocalDateTime getUpdateDateTime() {
+        return updatedAt;
     }
     public void setUpdateDateTime(LocalDateTime date) {
         this.updatedAt = date;
@@ -75,6 +78,8 @@ public class FileObj {
         FileObjDTO result = new FileObjDTO();
         result.setFileName(this.fileName);
         result.setExt(this.ext);
+        result.setCreatedAt(createdAt);
+        result.setUpdatedAt(updatedAt);
         return result;
     }
 }

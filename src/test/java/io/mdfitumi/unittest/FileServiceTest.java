@@ -3,6 +3,8 @@ package io.mdfitumi.unittest;
 import io.mdfitumi.unittest.dto.FileFilterDto;
 import io.mdfitumi.unittest.dto.FileObjDTO;
 import io.mdfitumi.unittest.dto.Paginating;
+import io.mdfitumi.unittest.entities.FolderData;
+import io.mdfitumi.unittest.entities.Owner;
 import io.mdfitumi.unittest.exceptions.NoSuchElementInMinioException;
 import io.mdfitumi.unittest.models.FileObj;
 import io.mdfitumi.unittest.models.FileResponse;
@@ -86,20 +88,54 @@ public class FileServiceTest {
     @Test
     public void fileServiceCreate_shouldCreateRecord() {
         FileObj mockFileObj = new FileObj();
-        mockFileObj.setId(new UUID(1, 1));
-        Mockito.when(dbFileService.create(Mockito.any())).thenReturn(mockFileObj);
-        Mockito.when(objectMapper.fileToFileObjDTO(mockFileObj)).thenReturn(new FileObjDTO());
 
         String testFileData = "test file data";
         FileObjDTO createFileRequest = new FileObjDTO();
         createFileRequest.setFileData(testFileData);
-        fileService.create(createFileRequest);
+
+
+        mockFileObj.setId(new UUID(1, 1));
+        Mockito
+                .when(objectMapper.fileToFileObj(createFileRequest))
+                .thenReturn(mockFileObj);
+        Mockito
+                .when(ownerRepository.findById(new UUID(0,0)))
+                .thenReturn(java.util.Optional.of(new Owner(new UUID(0, 0), "notOwnerName")));
+        Mockito
+                .when(minioService.getFolderData())
+                .thenReturn(new FolderData());
+        Mockito
+                .when(folderDataRepository.findByName(Mockito.any(FolderData.class)))
+                .thenReturn(new FolderData());
+
+        Mockito
+                .when(objectMapper.fileToFileObjDTO(Mockito.any()))
+                .thenAnswer(arg -> arg.getArgument(0, FileObj.class).toFileObjDto());
+
+
+        FileResponse result = fileService.create(createFileRequest);
+
+        Mockito.verify(objectMapper).fileToFileObj(Mockito.eq(createFileRequest));
+        Mockito.verify(ownerRepository).findById(new UUID(0,0));
+        Mockito.verify(minioService).getFolderData();
+        Mockito.verify(folderDataRepository).findByName(Mockito.any());
+        Mockito.verify(fileRepository).save(mockFileObj);
 
         Mockito.verify(minioService).putObjectIntoTheBucket(
                 Mockito.eq(bucketName),
                 Mockito.any(InputStream.class),
                 Mockito.eq(mockFileObj.getId().toString())
         );
+
+        Mockito.verify(objectMapper).fileToFileObjDTO(mockFileObj);
+
+
+        Assert.assertEquals("", result.getMessage());
+        Assert.assertTrue(result.getSuccess());
+        Assert.assertEquals(1, result.getFileObjPages().size());
+        Assert.assertNotNull(result.getFileObjPages().get(0).getCreateDateTime());
+        Assert.assertNotNull(result.getFileObjPages().get(0).getUpdateDateTime());
+        Assert.assertNull(result.getFileObjPages().get(0).getFileData());
     }
 
     @Test

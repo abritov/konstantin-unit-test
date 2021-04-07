@@ -283,4 +283,31 @@ public class FileServiceTest {
         Assert.assertTrue(result.getSuccess());
         Assert.assertNull(result.getFileObjPages());
     }
+
+    @Test
+    public void fileServiceFindById_shouldGetFileAndConvertToDto() {
+        UUID findFileRequest = new UUID(1, 1);
+        FileObj mockFileObj = new FileObj();
+        mockFileObj.setOwner(new Owner(new UUID(1, 1), "Jack"));
+
+        Mockito
+                .when(fileRepository.findById(findFileRequest))
+                .thenReturn(java.util.Optional.of(mockFileObj));
+        Mockito
+                .when(objectMapper.fileToFileObjDTO(Mockito.any()))
+                .thenAnswer(arg -> arg.getArgument(0, FileObj.class).toFileObjDto());
+        Mockito
+                .when(objectMapper.ownerToOwnerDto(Mockito.any()))
+                .thenAnswer(arg -> arg.getArgument(0, Owner.class).toOwnerDto());
+
+        Mockito
+                .when(minioService.getObjectFromBucket(Mockito.eq(bucketName), Mockito.eq(findFileRequest.toString())))
+                .thenReturn(new byte[] {1, 2, 3});
+
+        FileResponse result = fileService.getFileByUuid(findFileRequest);
+        Assert.assertEquals("", result.getMessage());
+        Assert.assertTrue(result.getSuccess());
+        Assert.assertEquals(1, result.getFileObjPages().size());
+        Assert.assertNotNull(result.getFileObjPages().get(0).getFileData());
+    }
 }
